@@ -85,7 +85,7 @@ setup(
         'finance', 'investment', 'broker', 'low-latency', 'hft'
     ],
     project_urls={
-        'Documentation': 'https://github.com/sacbhatia/KotakAPIModule/docs',
+        'Documentation': 'https://github.com/sacbhatia/KotakAPIModule/tree/master/kotak_api_wn/docs',
         'Source': 'https://github.com/sacbhatia/KotakAPIModule',
         'Bug Reports': 'https://github.com/sacbhatia/KotakAPIModule/issues',
     },
