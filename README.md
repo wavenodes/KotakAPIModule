@@ -74,10 +74,10 @@ pip install -e ".[all]"
 
 ## 📖 Documentation
 
-- [Installation Guide](docs/install.md)
-- [Usage Guide](docs/usage.md)
-- [Performance Improvements](docs/improvements.md)
-- [API Reference](docs/api.md)
+- [Installation Guide](kotak_api_wn/docs/install.md)
+- [Usage Guide](kotak_api_wn/docs/usage.md)
+- [Performance Improvements](kotak_api_wn/docs/improvements.md)
+- [API Reference](kotak_api_wn/docs/api.md)
 
 ## 🔧 Requirements
 
