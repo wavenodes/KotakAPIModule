@@ -31,7 +31,7 @@ setup(
     description='High-performance Kotak Neo Trading API Client with optimized latency',
     long_description=get_long_description(),
     long_description_content_type='text/markdown',
-    url='https://github.com/sacbhatia/KotakAPIModule',
+    url='https://github.com/wavenodes/KotakAPIModule',
     packages=find_packages(exclude=['tests', 'tests.*', 'docs', 'docs.*']),
     package_data={
         'kotak_api_wn': ['api/*.csv'],
@@ -85,8 +85,8 @@ setup(
         'finance', 'investment', 'broker', 'low-latency', 'hft'
     ],
     project_urls={
-        'Documentation': 'https://github.com/sacbhatia/KotakAPIModule/tree/master/kotak_api_wn/docs',
-        'Source': 'https://github.com/sacbhatia/KotakAPIModule',
-        'Bug Reports': 'https://github.com/sacbhatia/KotakAPIModule/issues',
+        'Documentation': 'https://github.com/wavenodes/KotakAPIModule/tree/master/kotak_api_wn/docs',
+        'Source': 'https://github.com/wavenodes/KotakAPIModule',
+        'Bug Reports': 'https://github.com/wavenodes/KotakAPIModule/issues',
     },
 )

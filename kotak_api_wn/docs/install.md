@@ -14,7 +14,7 @@ For development or to use the latest optimized version:
 
 ```bash
 # Clone the repository and navigate to it
-git clone https://github.com/sacbhatia/KotakAPIModule.git
+git clone https://github.com/wavenodes/KotakAPIModule.git
 cd KotakAPIModule
 
 # Install in development mode (editable)
