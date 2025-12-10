@@ -54,9 +54,6 @@ class TotpAPI(object):
             headers=header_params,
             body=body_params
         )
-        print(f"TOTP Validate URL: {URL}")
-        print(f"TOTP Validate Status: {totp_validate.status_code}")
-        print(f"TOTP Validate Response: {totp_validate.text}")
         try:
             totp_validate_data = totp_validate.json()
         except JSONDecodeError:
@@ -65,7 +62,6 @@ class TotpAPI(object):
             }
         # totp_validate_data = totp_validate.json()
         if 200 <= totp_validate.status_code <= 299:
-            print(f"TOTP Validate Data: {totp_validate_data}")
             # Try different response structures
             data = totp_validate_data.get("data") or totp_validate_data
             self.api_client.configuration.edit_token = data.get("token") or data.get("edit_token")
@@ -74,7 +70,4 @@ class TotpAPI(object):
             self.api_client.configuration.serverId = data.get("hsServerId") or data.get("serverId")
             self.api_client.configuration.data_center = data.get("dataCenter")
             self.api_client.configuration.base_url = data.get("baseUrl")
-            print(f"Set edit_token: {self.api_client.configuration.edit_token}")
-            print(f"Set edit_sid: {self.api_client.configuration.edit_sid}")
-            print(f"Full response: {totp_validate_data}")
         return totp_validate_data
