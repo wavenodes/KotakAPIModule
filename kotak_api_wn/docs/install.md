@@ -71,8 +71,7 @@ pip install ".[all]"
 | Option | Command | Description |
 |--------|---------|-------------|
 | Basic | `pip install .` | Core functionality |
-| Fast | `pip install ".[fast]"` | + orjson for 3-10x faster JSON |
-| Async | `pip install ".[async]"` | + aiohttp for async HTTP |
+| Fast | `pip install ".[fast]"` | + orjson for 9x faster JSON (recommended) |
 | All | `pip install ".[all]"` | All performance features |
 | Dev | `pip install ".[dev]"` | + testing and linting tools |
 
@@ -95,8 +94,7 @@ pandas>=2.2.3          # Data manipulation
 
 ### Optional Dependencies (Recommended)
 ```
-orjson>=3.8.0          # Fast JSON (3-10x improvement)
-aiohttp>=3.8.0         # Async HTTP support
+orjson>=3.8.0          # Fast JSON (9x improvement)
 ```
 
 ## Verifying Installation

@@ -53,14 +53,10 @@ setup(
     ],
     extras_require={
         'fast': [
-            'orjson>=3.8.0',  # 3-10x faster JSON serialization
-        ],
-        'async': [
-            'aiohttp>=3.8.0',  # Async HTTP support
+            'orjson>=3.8.0',  # 9x faster JSON serialization
         ],
         'all': [
             'orjson>=3.8.0',
-            'aiohttp>=3.8.0',
         ],
         'dev': [
             'pytest>=7.0.0',
