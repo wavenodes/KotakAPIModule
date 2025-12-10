@@ -3,6 +3,12 @@
 [![Python Version](https://img.shields.io/badge/python-3.8%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+> **⚠️ DEPRECATION NOTICE:** This is v1 (master branch) for Kotak Neo API v1, which is being deprecated.  
+> **Please use the [v2 branch](https://github.com/wavenodes/KotakAPIModule/tree/v2)** for the latest Kotak Neo API v2 with enhanced performance and features.  
+> **Migration Guide:** [Switch to v2](https://github.com/wavenodes/KotakAPIModule/tree/v2#-installation)
+
+---
+
 A high-performance, optimized Python client for the Kotak Neo Trading API. This library is designed for low-latency trading applications with significant performance improvements over the standard client.
 
 ## ✨ Features
