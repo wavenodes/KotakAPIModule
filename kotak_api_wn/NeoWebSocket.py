@@ -21,7 +21,7 @@ class NeoWebSocket:
                  'on_message', 'on_error', 'on_close', 'on_open',
                  'quotes_index', 'un_sub_list_count', 'un_sub_channel',
                  'token_limit_reached', 'hsw_thread', 'hsi_thread', 
-                 'data_center', '_sublist_keys_cache')
+                 'data_center', '_sublist_keys_cache', '_hsm_open_notified', '_hsi_open_notified')
     
     def __init__(self, sid, token, server_id, data_center):
         self.hsiWebsocket = None
@@ -51,6 +51,8 @@ class NeoWebSocket:
         self.hsi_thread = None
         self.data_center = data_center
         self._sublist_keys_cache = set()
+        self._hsm_open_notified = False
+        self._hsi_open_notified = False
 
     def start_hsi_ping_thread(self):
         while self.hsiWebsocket and self.is_hsi_open:
@@ -71,20 +73,18 @@ class NeoWebSocket:
                                          self.on_hsm_error, self.on_hsm_close)
 
     def start_websocket_thread(self):
-        self.hsw_thread = threading.Thread(target=self.start_websocket)
+        if self.hsw_thread and self.hsw_thread.is_alive():
+            return
+        self.hsw_thread = threading.Thread(target=self.start_websocket, daemon=True)
         self.hsw_thread.start()
 
     def on_hsm_open(self):
-        # print("On Open Function in Neo Websocket")
+        self._hsm_open_notified = False
         req_params = {"type": "cn", "Authorization": self.access_token, "Sid": self.sid}
         self.hsWebsocket.hs_send(json.dumps(req_params))
-        if self.on_open:
-            self.on_open()
 
     def on_hsi_open(self):
-        # print("HSI on open called")
-
-        # print("On Open Function in Neo Websocket")
+        self._hsi_open_notified = False
         server = 'WEB'
         json_d = {"type": "CONNECTION", "Authorization": self.access_token,
                   "Sid": self.sid,
@@ -92,20 +92,16 @@ class NeoWebSocket:
         json_d = json.dumps(json_d)
         self.hsiWebsocket.send(json_d)
 
-        if self.on_open:
-            self.on_open()
-
     def on_hsm_message(self, message):
         # print("on Message Func in NeoWebsocket", message)
         if message:
             if isinstance(message, str):
                 req_type = json.loads(message)[0]["type"]
                 if req_type == 'cn':
-                    # print("INSIDE CONNECTION")
                     self.is_hsw_open = 1
-                    # Uncomment this to start HSM ping thread
-                    # And add logic to send binary data to websocket
-                    # threading.Thread(target=self.start_hsm_ping_thread).start()
+                    if not self._hsm_open_notified and self.on_open:
+                        self._hsm_open_notified = True
+                        self.on_open()
 
                     if len(self.quotes_arr) >= 1:
                         self.call_quotes()
@@ -173,33 +169,33 @@ class NeoWebSocket:
                 req = json.loads(message)
                 if req["type"] == 'cn':
                     self.is_hsi_open = 1
-                    threading.Thread(target=self.start_hsi_ping_thread).start()
+                    if not self._hsi_open_notified and self.on_open:
+                        self._hsi_open_notified = True
+                        self.on_open()
+                    threading.Thread(target=self.start_hsi_ping_thread, daemon=True).start()
 
         # print("on message callback, ", self.on_message)
         if self.on_message:
             self.on_message({"type": "order_feed", "data": message})
 
     def on_hsm_close(self):
-        # print("On Close Function is running!")
+        self._hsm_open_notified = False
         if self.is_hsw_open == 1:
             self.is_hsw_open = 0
         if self.on_close:
             self.on_close()
 
     def on_hsi_close(self):
-        # print("HSI on close called")
-
-        # print("On Close Function is running!")
+        self._hsi_open_notified = False
         if self.is_hsi_open == 1:
             self.is_hsi_open = 0
         if self.on_close:
             self.on_close()
 
     def on_hsm_error(self, error):
+        self._hsm_open_notified = False
         if self.is_hsw_open == 1:
             self.is_hsw_open = 0
-            # if self.quotes_arr:
-            #     self.quotes_api_callback(error)
         if self.hsWebsocket:
             self.hsWebsocket.close()
         if self.on_error:
@@ -208,8 +204,7 @@ class NeoWebSocket:
             print("Error Occurred in Websocket! Error Message ", error)
 
     def on_hsi_error(self, error):
-        # print("HSI on error called")
-
+        self._hsi_open_notified = False
         if self.is_hsi_open == 1:
             self.is_hsi_open = 0
 

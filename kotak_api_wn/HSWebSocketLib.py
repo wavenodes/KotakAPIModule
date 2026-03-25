@@ -1108,29 +1108,29 @@ class StartServer:
         self.onerror = onerror
         self.onclose = onclose
         self.token, self.sid = token, sid
-        global ws
+        self.ws = None
+        self._close_emitted = False
         try:
             # websocket.enableTrace(True)
-            ws = websocket.WebSocketApp(a,
-                                        on_open=self.on_open,
-                                        on_message=self.on_message,
-                                        on_error=self.on_error,
-                                        on_close=self.on_close)
+            self.ws = websocket.WebSocketApp(a,
+                                             on_open=self.on_open,
+                                             on_message=self.on_message,
+                                             on_error=self.on_error,
+                                             on_close=self.on_close)
         except Exception:
             print("WebSocket not supported!")
 
-        if ws:
-            # print("WS is a array buffer ")
+        if self.ws:
             self.hsWrapper = HSWrapper()
-            # print("HS WRAPPER IS DONE ")
         else:
             print("WebSocket not initialized!")
 
-        ws.run_forever(ping_interval=0, reconnect=5,sslopt={"cert_reqs": ssl.CERT_NONE})
+        self.ws.run_forever(ping_interval=0, sslopt={"cert_reqs": ssl.CERT_NONE})
 
     def on_open(self, ws):
-        # print("[OnOpen]: Function is running in HSWebscoket")
-        self.onopen()
+        self._close_emitted = False
+        if self.onopen:
+            self.onopen()
 
     def on_message(self, ws, inData):
         # print("[OnMessage]: Function is running in HSWebsocket")
@@ -1146,8 +1146,10 @@ class StartServer:
             self.onmessage(outData)
 
     def on_close(self, ws, close_status_code, close_msg):
-        # print("[OnClose]: Function is running HSWebsocket", close_status_code)
-        if(self.on_close):
+        if self._close_emitted:
+            return
+        self._close_emitted = True
+        if self.onclose:
             self.onclose()
 
     def on_error(self, ws, error):
@@ -1176,6 +1178,7 @@ class HSWebSocket:
         self.onopen = None
         self.onmessage = None
         self.on_error = None
+        self._server = None
 
     def open_connection(self, url, token, sid, on_open, on_message, on_error, on_close):
         self.url = url
@@ -1183,9 +1186,10 @@ class HSWebSocket:
         self.onmessage = on_message
         self.on_error = on_error
         self.onclose = on_close
-        StartServer(self.url, token, sid, self.onopen, self.onmessage, self.on_error, self.onclose)
+        self._server = StartServer(self.url, token, sid, self.onopen, self.onmessage, self.on_error, self.onclose)
 
     def hs_send(self, d):
+        ws = self._server.ws if self._server else None
         req_json = json.loads(d)
         req_type = req_json[Keys.get("TYPE")]
         # print("Req Type", req_type)
@@ -1256,9 +1260,9 @@ class HSWebSocket:
             print("Unable to send request !, Reason: Connection faulty or request not valid !")
 
     def close(self):
-        ws.close()
-        if self.onclose:
-            self.onclose()
+        ws = self._server.ws if self._server else None
+        if ws:
+            ws.close()
 
 
 class StartHSIServer:
@@ -1270,16 +1274,15 @@ class StartHSIServer:
         self.onmessage = onmessage
         self.onerror = onerror
         self.onclose = onclose
-        # self.token, self.sid = token, sid
-        global hsiWs
+        self.ws = None
+        self._close_emitted = False
         try:
-            # websocket.enableTrace(True)
-            hsiWs = websocket.WebSocketApp(self.url,
-                                           on_open=self.on_open,
-                                           on_message=self.on_message,
-                                           on_error=self.on_error,
-                                           on_close=self.on_close)
-            hsiWs.run_forever(ping_interval=5,reconnect=5,sslopt={"cert_reqs": ssl.CERT_NONE})
+            self.ws = websocket.WebSocketApp(self.url,
+                                             on_open=self.on_open,
+                                             on_message=self.on_message,
+                                             on_error=self.on_error,
+                                             on_close=self.on_close)
+            self.ws.run_forever(ping_interval=5, sslopt={"cert_reqs": ssl.CERT_NONE})
         except Exception:
             print("WebSocket not supported!")
         
@@ -1293,23 +1296,24 @@ class StartHSIServer:
         self.onerror(error)
 
     def on_close(self, ws, close_status_code, close_msg):
-        # print("Connection closed")
         self.OPEN = 0
         self.readyState = 0
-        if hsiWs:
-            hsiWs.close()
-        self.onclose()
+        if self._close_emitted:
+            return
+        self._close_emitted = True
+        if self.onclose:
+            self.onclose()
 
     def on_open(self, ws):
-        # print("Connection established HSWebSocket")
         self.OPEN = 1
         self.readyState = 1
-        self.onopen()
+        self._close_emitted = False
+        if self.onopen:
+            self.onopen()
 
 
 class HSIWebSocket:
     def __init__(self):
-        # self.hsiWs = None
         self.hsiSocket = None
         self.reqData = None
         self.OPEN = 0
@@ -1319,7 +1323,7 @@ class HSIWebSocket:
         self.onmessage = None
         self.onclose = None
         self.onerror = None
-        # self.token, self.sid = token, sid
+        self._server = None
 
     def open_connection(self, url, onopen, onmessage, onclose, onerror):
         self.url = url
@@ -1327,9 +1331,10 @@ class HSIWebSocket:
         self.onmessage = onmessage
         self.onclose = onclose
         self.onerror = onerror
-        StartHSIServer(self.url, self.onopen, self.onmessage, self.onerror, self.onclose)
+        self._server = StartHSIServer(self.url, self.onopen, self.onmessage, self.onerror, self.onclose)
 
     def send(self, d):
+        hsiWs = self._server.ws if self._server else None
         reqJson = json.loads(d)
         req = None
         if reqJson['type'] == 'CONNECTION':
@@ -1373,5 +1378,6 @@ class HSIWebSocket:
     def close(self):
         self.OPEN = 0
         self.readyState = 0
+        hsiWs = self._server.ws if self._server else None
         if hsiWs:
             hsiWs.close()
